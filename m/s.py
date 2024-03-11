@@ -1,28 +1,31 @@
 import argparse
 import pandas as pd
 
+
 # python3 s.py sasha --new msk spb 10:00:00
 # python3 s.py sasha --history
 
 
-parser = argparse.ArgumentParser(add_help=False)
+def parse_arguments():
 
-parser.add_argument("account", type=str)
-parser.add_argument("--history", action="store_true")
-parser.add_argument("--new", nargs=3, type=str)
+    parser = argparse.ArgumentParser(add_help=False)
 
-args = parser.parse_args()
-data = pd.read_csv("data.csv")
+    parser.add_argument("account", type=str)
+    parser.add_argument("--history", action="store_true")
+    parser.add_argument("--new", nargs=3, type=str)
+
+    return parser.parse_args()
 
 
-if args.history:
+def print_account_data(args, data):
+
     fdata = data[data["account"] == args.account]
     print(fdata.to_string(columns=["from", "to", "time"], index=False))
 
 
-if args.new:
-    
-    t = pd.DataFrame(
+def add_new_ride(args, data):
+
+    new_ride = pd.DataFrame(
         {
             "account": [args.account],
             "from": [args.new[0]],
@@ -31,5 +34,17 @@ if args.new:
         }
     )
 
-    new_data = pd.concat([data, t], ignore_index=True)
+    new_data = pd.concat([data, new_ride], ignore_index=True)
     new_data.to_csv("data.csv", index=False)
+
+
+if __name__ == "__main__":
+
+    args = parse_arguments()
+    data = pd.read_csv("data.csv")
+
+    if args.history:
+        print_account_data(args, data)
+
+    if args.new:
+        add_new_ride(args, data)
