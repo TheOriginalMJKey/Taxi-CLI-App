@@ -1,6 +1,6 @@
 import argparse
-import pandas as pd
 
+import pandas as pd
 
 # python3 s.py sasha --new msk spb 10:00:00
 # python3 s.py sasha --history
@@ -23,7 +23,24 @@ def print_account_data(args, data):
     print(fdata.to_string(columns=["from", "to", "time"], index=False))
 
 
+def validate_time(time_str):
+    try:
+        hh, mm, ss = time_str.split(":")
+        if 0 <= int(hh) <= 23 and 0 <= int(mm) <= 59 and 0 <= int(ss) <= 59:
+            return True
+        else:
+            return False
+    except:
+        return False
+
+
 def add_new_ride(args, data):
+
+    if args.new[0].lower() == args.new[1].lower():
+        print("The path is specified incorrectly")
+
+    if not validate_time(args.new[2]):
+        print("The time is specified incorrectly")
 
     new_ride = pd.DataFrame(
         {
@@ -47,4 +64,5 @@ if __name__ == "__main__":
         print_account_data(args, data)
 
     if args.new:
-        add_new_ride(args, data)
+        if not (input("Do you want to cancel the trip ? ").lower() == "yes"):
+            add_new_ride(args, data)
