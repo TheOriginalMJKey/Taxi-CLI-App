@@ -13,7 +13,7 @@
 **Ccылка на Google Calendar** - [Google Calendar](https://calendar.google.com/calendar/u/0?cid=MGJkNzk2YTA5OWI4ZDZmZjJjYWEyNmQxMDBhOGNjODcxNTNlNzcwODg0MGUyMDEyNTYzNTU2YzFjYmNhY2FlM0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t)
 
 ## Описание проекта
-**Цель**: Создать базовое CLI-приложение (MVP) для заказа такси.
+**Цель**: Создать базовое CLI-приложение (MVP) для заказа такси.\
 **Требуемый функционал**:
 - Регистрация пользователя с хэшированием пароля
 - Cоздание заказа на такси с выбором стоимости
