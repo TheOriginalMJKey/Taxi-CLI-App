@@ -35,3 +35,30 @@ def set_destination_price(message, phone, longitude_start, latitude_start):
   
     mess = bot.send_message(message.chat.id, "<b>Укажите цену.</b>", parse_mode='HTML', reply_markup=types.ReplyKeyboardRemove())
     bot.register_next_step_handler(mess, price_way, phone, longitude_start, latitude_start, longitude_end, latitude_end)
+
+@bot.message_handler(content_types=['text'])
+def calculate_way_price(message, phone, start_longitude, start_latitude, end_longitude, end_latitude):   
+    price = int(message.text)
+    
+    # Calculate distance
+    x1, y1 = start_longitude, start_latitude
+    x2, y2 = end_longitude, end_latitude
+    
+    avg_latitude = math.radians((y1 + y2) / 2)   
+    delta_x = abs(x1 - x2) * 111000 * math.cos(avg_latitude)
+    delta_y = abs(y1 - y2) * 111000 
+    distance = round(math.sqrt(delta_x * delta_x + delta_y * delta_y))
+    
+    # Calculate time
+    time_minutes = round(distance / (40 * 1000) * 60)
+    
+    start_point = coords_to_address(start_longitude, start_latitude)
+    end_point = coords_to_address(end_longitude, end_latitude)
+
+    bot.send_message(message.chat.id, f"<i><b>Ваш заказ.</b></i>nn<i><b>Начальная точка:</b></i> {start_point}nn<i><b>Конечная точка:</b> {end_point}nn<i><b>Расстояние:</b></i> {distance} мnn<i><b>Время пути:</b></i> {time_minutes} минnn<b>Цена:</b> {price} ₽", parse_mode='HTML', reply_markup=types.ReplyKeyboardRemove())
+    
+    mydb = sqlite3.connect('database.db')
+    mycursor = mydb.cursor()
+    sqlFormula = "INSERT INTO orders ('phone', 'longitude_start', 'latitude_start', 'longitude_end', 'latitude_end', 'price', 'distance', 'time_minutes', 'teg_id') VALUES (?,?,?,?,?,?,?,?,?)"
+    mycursor.execute(sqlFormula, (phone, start_longitude, start_latitude, end_longitude, end_latitude, price, distance, time_minutes, message.chat.id))
+    mydb.commit()
