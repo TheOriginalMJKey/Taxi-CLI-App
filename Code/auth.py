@@ -2,10 +2,9 @@ import os
 import click
 import getpass
 from passlib.hash import sha256_crypt
+import csv
 
-# Database or file storage for user accounts and trip history
-# (replace with actual implementation)
-USERS = {}
+USERS = 'users.csv'
 
 TRIPS = []
 
@@ -16,14 +15,37 @@ def cli():
 @cli.command()
 @click.argument('username')
 @click.argument('password')
+
 def register(username, password):
     """Register a new user"""
-    if username in USERS:
-        raise click.ClickException("User already exists")
+    if os.path.exists('users.csv'):
+        with open('users.csv', 'r') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                if row[0] == username:
+                    raise click.ClickException("User already exists")
+    else:
+        with open(USERS_FILE, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(["username", "password"]) 
+
     hashed_password = hash_password(password)
-    USERS[username] = hashed_password
+    with open('users.csv', 'a', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow([username, hashed_password])
     click.echo(f"User {username} registered successfully!")
-    click.echo(USERS)
+    click.echo(f"Users: {get_users()}")
+
+def get_users():
+    """Get a list of all registered users"""
+    users = []
+    if os.path.exists('users.csv'):
+        with open('users.csv', 'r') as f:
+            reader = csv.reader(f)
+            next(reader)  
+            for row in reader:
+                users.append(row[0])
+    return users
 
 @cli.command()
 @click.argument('username')
@@ -38,7 +60,6 @@ def login(username, password):
 def orders():
     """Create a new taxi order"""
     click.echo("Creating a new taxi order...")
-    # Add your order processing here
 
 @cli.command()
 def history():
