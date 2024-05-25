@@ -1,5 +1,5 @@
 @bot.message_handler(content_types=['text'])
-def choose_action_passenger(message, user_phone, teg_id):  # passenger action handler
+def choose_action_passenger(message, user_phone, teg_id):  # passenger action handlеr
     if message.text == 'Мои поездки':
         mydb = sqlite3.connect('database.db')
         mycursor = mydb.cursor()
