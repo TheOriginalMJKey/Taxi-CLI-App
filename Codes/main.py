@@ -7,6 +7,7 @@ from io import BytesIO
 import requests
 from PIL import Image
 import hashlib
+from passlib.hash import sha256_crypt
 from coords_processer import coords_to_address, address_to_coords 
 
 
@@ -15,6 +16,9 @@ bot = telebot.TeleBot(token)
 
 
 input_password = {} 
+
+def hash_password(password):
+    return sha256_crypt.hash(password)
 
 @bot.message_handler(commands=["help"])
 def send_help_message(message):
@@ -40,7 +44,7 @@ def start(message):
 @bot.message_handler(commands=["password"])
 def password(message): 
     bot.send_message(message.chat.id, "Введите пароль:")
-    input_password[message.chat.id] = message.text
+    input_password[message.chat.id] = hash_password(message.text)
     bot.register_next_step_handler(message, regist_and_auth)  # изменяем на message
 
 @bot.message_handler(commands=["auth", "register"])
