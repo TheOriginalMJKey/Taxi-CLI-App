@@ -1,26 +1,16 @@
-import argparse
-
 import pandas as pd
 
-# python3 s.py sasha --new msk spb 10:00:00
-# python3 s.py sasha --history
 
+@bot.message_handler(content_types=["text"])
+def print_account_data(message, user, data):
 
-def parse_arguments():
-
-    parser = argparse.ArgumentParser(add_help=False)
-
-    parser.add_argument("account", type=str)
-    parser.add_argument("--history", action="store_true")
-    parser.add_argument("--new", nargs=3, type=str)
-
-    return parser.parse_args()
-
-
-def print_account_data(args, data):
-
-    fdata = data[data["account"] == args.account]
-    print(fdata.to_string(columns=["from", "to", "time"], index=False))
+    fdata = data[data["account"] == user]
+    bot.send_message(
+        message.chat.id,
+        fdata.to_string(columns=["from", "to", "time"], index=False),
+        parse_mode="HTML",
+        reply_markup=types.ReplyKeyboardRemove(),
+    )
 
 
 def validate_time(time_str):
@@ -34,20 +24,33 @@ def validate_time(time_str):
         return False
 
 
-def add_new_ride(args, data):
+@bot.message_handler(content_types=["text"])
+def add_new_ride(message, user, data):
 
-    if args.new[0].lower() == args.new[1].lower():
-        print("The path is specified incorrectly")
+    args = message.text.split()
 
-    if not validate_time(args.new[2]):
-        print("The time is specified incorrectly")
+    if args[0].lower() == args[1].lower():
+        bot.send_message(
+            message.chat.id,
+            "The path is specified incorrectly",
+            parse_mode="HTML",
+            reply_markup=types.ReplyKeyboardRemove(),
+        )
+
+    if not validate_time(args[2]):
+        bot.send_message(
+            message.chat.id,
+            "The time is specified incorrectly",
+            parse_mode="HTML",
+            reply_markup=types.ReplyKeyboardRemove(),
+        )
 
     new_ride = pd.DataFrame(
         {
-            "account": [args.account],
-            "from": [args.new[0]],
-            "to": [args.new[1]],
-            "time": [args.new[2]],
+            "account": [user],
+            "from": [args[0]],
+            "to": [args[1]],
+            "time": [args[2]],
         }
     )
 
@@ -55,14 +58,14 @@ def add_new_ride(args, data):
     new_data.to_csv("data.csv", index=False)
 
 
-if __name__ == "__main__":
+@bot.message_handler(content_types=["text"])
+def foo(message, user):
 
-    args = parse_arguments()
+    args = message.text.split()
     data = pd.read_csv("data.csv")
 
-    if args.history:
-        print_account_data(args, data)
+    if args[0] == "history":
+        print_account_data(message, user, data)
 
-    if args.new:
-        if not (input("Do you want to cancel the trip ? ").lower() == "yes"):
-            add_new_ride(args, data)
+    if args[1] == "new":
+        add_new_ride(message, user, data)
