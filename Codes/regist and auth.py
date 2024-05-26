@@ -1,6 +1,5 @@
 def regist_and_auth(message):
     try:
-        # номер телефона пользователя
         input_phone = message.contact.phone_number    
         mydb = sqlite3.connect('database.db')
         mycursor = mydb.cursor()
